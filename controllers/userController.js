@@ -79,9 +79,7 @@ exports.forgotPassword = catchAsyncErrors(async (req, res, next) => {
 
   await user.save({ validateBeforeSave: false });
 
-  const resetPasswordUrl = `${req.protocol}://${req.get(
-    "host"
-  )}/api/v1/password/reset/${resetToken}`;
+  const resetPasswordUrl = `${process.env.FRONTEND_URL}/password/reset/${resetToken}`;
 
   const message = `Your password reset token is :- \n\n ${resetPasswordUrl} \n\nIf you have not requested this email then, please ignore it`;
 
@@ -107,10 +105,12 @@ exports.forgotPassword = catchAsyncErrors(async (req, res, next) => {
 
 // Reset Password
 exports.resetPassword = catchAsyncErrors(async (req, res, next) => {
+  // console.log(req.params.token);
   const resetPasswordToken = crypto
     .createHash("sha256")
     .update(req.params.token)
     .digest("hex");
+  // console.log(resetPasswordToken);
 
   const user = await User.findOne({
     resetPasswordToken,
@@ -171,19 +171,14 @@ exports.updatePassword = catchAsyncErrors(async (req, res, next) => {
 
 // update User Profile
 exports.updateProfile = catchAsyncErrors(async (req, res, next) => {
-  const newUserData = {};
-
-  if (req.body.name) {
-    newUserData.name = req.body.name;
-  }
-
-  if (req.body.email) {
-    newUserData.email = req.body.email;
-  }
-  console.log(req.body.avatar);
+  const newUserData = {
+    name: req.body.name,
+    email: req.body.email,
+  };
 
   if (req.body.avatar !== "") {
     const user = await User.findById(req.user.id);
+
     const imageId = user.avatar.public_id;
 
     await cloudinary.v2.uploader.destroy(imageId);
