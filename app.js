@@ -7,21 +7,32 @@ const app = express();
 const bodyParser = require("body-parser");
 const fileupload = require("express-fileupload");
 
+const dotenv = require("dotenv");
+
 const errorMiddleware = require("./middleware/error");
+
+//Config
+
+dotenv.config({
+  path: "backend/config/config.env",
+});
 
 app.use(express.json());
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(fileupload());
 app.use(bodyParser.json());
+
 //Route Import
 const product = require("./routes/productRoute");
 const user = require("./routes/userRoute");
 const order = require("./routes/orderRoutes");
+const payment = require("./routes/paymentRoute");
 
 app.use("/api/v1", product);
 app.use("/api/v1", user);
 app.use("/api/v1", order);
+app.use("/api/v1", payment);
 
 //Middlewware for errors
 app.use(errorMiddleware);
